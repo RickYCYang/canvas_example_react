@@ -1,23 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import { useRef, useEffect, useState } from "react";
 
 function App() {
+  const canvansRef = useRef(null);
+  const canvasCtxRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvansRef.current;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const context = canvansRef.current.getContext("2d");
+    context.lineWidth = 3;
+    context.lineCap = "round";
+    context.strokeStyle = "blue";
+    canvasCtxRef.current = context;
+  }, []);
+
+  /// Mousedown event
+  const mouseDown = ({ nativeEvent }) => {
+    canvasCtxRef.current.beginPath(nativeEvent.clientX, nativeEvent.clientY);
+    canvasCtxRef.current.lineTo(nativeEvent.clientX, nativeEvent.clientY);
+    canvasCtxRef.current.stroke();
+    setIsDrawing(true);
+  };
+
+  /// Mouseup event
+  const mouseUp = () => {
+    canvasCtxRef.current.closePath();
+    setIsDrawing(false);
+  };
+
+  /// Draw event
+  const draw = ({ nativeEvent }) => {
+    if (!isDrawing) {
+      return;
+    }
+    canvasCtxRef.current.lineTo(nativeEvent.clientX, nativeEvent.clientY);
+    canvasCtxRef.current.stroke();
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <canvas
+        ref={canvansRef}
+        onMouseDown={mouseDown}
+        onMouseUp={mouseUp}
+        onMouseMove={draw}
+      />
     </div>
   );
 }
